@@ -1,8 +1,7 @@
-# creates a file in /tmp
-
-file { '/tmp/school':
-  content =>'I love Puppet',
-  mode    => '0744',
-  owner   => 'www-data',
-  group   => 'www-data',
+# pp file to install flask
+node default {
+package {'flask':
+ensure   => '2.1.0',
+provider => 'pip3'
+}
 }
