@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# started server
+echo "ServerName 172.17.0.2" >> /etc/apache2/apache2.conf
+service apache2 start
