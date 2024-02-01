@@ -1,44 +1,44 @@
-#!/usr/bin/env bash
-# Configure my domain zone:
-# www --> 914-lb-01 34.237.76.64
-# web-01 --> 914-web-01 34.138.32.248
-# web-02 --> 914-web-02 3.226.74.205
+#!/bin/bash
 
-# -- To be evaluated --
-# domain_information () {
-#     line=$(dig "$2"."$1" | grep -A1 'ANSWER SECTION:' | tr '\t' '\n' | tail -2 | tr '\n' ' ')
-#     echo "$2 $line" | awk '{print "The subdomain " $1 " is a " $2 " record and points to " $3}'
-# }
+# Function to display information for a specific subdomain
+display_subdomain_info() {
+    local domain="$1"
+    local subdomain="$2"
 
-# if [ "$#" == 1 ]
-# then
-#   domain_information "$1" "www"
-#   domain_information "$1" "lb-01"
-#   domain_information "$1" "web-01"
-#   domain_information "$1" "web-02"
-# elif [ "$#" == 2 ]
-# then
-#   domain_information "$1" "$2"
-# fi
-#-- To be evaluated --
+    # Query DNS information using dig
+    local result=$(dig +short $subdomain.$domain)
 
-subdomains_all=( "www" "lb-01" "web-01" "web-02" )
+    # Determine the record type (A or CNAME)
+    local record_type=""
+    if [[ $result == *"."* ]]; then
+        record_type="CNAME"
+    else
+        record_type="A"
+    fi
 
-runDig () {
-    subdomain=$1
-    domain=$2
-
-    dig "$subdomain.$domain" | grep -A1 'ANSWER SECTION:' | tail -1 | awk -v s="$subdomain" 'BEGIN { FS = " " } ; { print "The subdomain " s " is a " $4 " record and points to " $5 }'
+    # Display the information
+    echo "The subdomain $subdomain is a $record_type record and points to $result"
 }
 
-if [ $# -eq 1 ]; then
-    domain="$1"
-    for i in "${subdomains_all[@]}"
-    do
-	runDig "$i" "$domain"
+# Function to display information for default subdomains
+display_default_subdomains_info() {
+    local domain="$1"
+
+    # List of default subdomains
+    local subdomains=("www" "lb-01" "web-01" "web-02")
+
+    # Display information for each default subdomain
+    for subdomain in "${subdomains[@]}"; do
+        display_subdomain_info "$domain" "$subdomain"
     done
-elif [ $# -eq 2 ]; then
-    domain="$1"
-    subdomain="$2"
-    runDig "$subdomain" "$domain"
+}
+
+# Check if both domain and subdomain parameters are provided
+if [[ $# -eq 2 ]]; then
+    display_subdomain_info "$1" "$2"
+elif [[ $# -eq 1 ]]; then
+    display_default_subdomains_info "$1"
+else
+    echo "Usage: $0 <domain> [subdomain]"
 fi
+
