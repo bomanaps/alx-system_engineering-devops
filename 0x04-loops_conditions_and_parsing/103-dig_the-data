@@ -5,3 +5,4 @@
 #+  code of each log, in sorted order.
 
 awk '{ print $1 " " $9}' apache-access.log | sort | uniq -c | sort -rn
+//mercyboma
